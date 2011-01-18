@@ -3,6 +3,7 @@ require 'cloudservers'
 module Nephele
   SERVICES = [:rackspace, :ec2].freeze
   require 'nephele/base'
+  require 'nephele/node'
   require 'nephele/rackspace'
 
   # Factory for service objects
