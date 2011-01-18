@@ -5,6 +5,10 @@ class TestNepheleBase < Test::Unit::TestCase
     should 'be sane' do
       assert_not_nil Nephele
       assert_not_nil Nephele::Base.new
+    end
+
+    should 'instantiate different services correctly' do
+      Nephele::Rackspace.any_instance.stubs(:populate!).returns(nil)
       assert_kind_of Nephele::Rackspace,
         Nephele.new(:service => :rackspace, :user => 'foo', :key => 'bar')
       assert_raise RuntimeError do 
