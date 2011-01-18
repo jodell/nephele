@@ -1,0 +1,26 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    ZenTest (4.4.2)
+    autotest (4.4.6)
+      ZenTest (>= 4.4.1)
+    autotest-fsevent (0.2.4)
+      sys-uname
+    autotest-growl (0.2.9)
+    cloudservers (0.4.0)
+      json
+    json (1.4.6)
+    rake (0.8.7)
+    shoulda (2.11.3)
+    sys-uname (0.8.5)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  autotest
+  autotest-fsevent
+  autotest-growl
+  cloudservers
+  rake
+  shoulda
