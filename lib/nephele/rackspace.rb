@@ -42,10 +42,11 @@ class Nephele::Rackspace < Nephele::Base
   end
 
   def status
-    puts "#{'NAME'.ljust(20)} #{'STATUS'.ljust(6)} #{'-%-'.ljust(3)} #{'Kind'.ljust(10)} Public IP"
-    server_objs.each do |s|
-      puts "#{s.name.ljust(20)} #{s.status.ljust(6)} #{s.progress.to_s.ljust(3)} #{s.flavor.name.ljust(10)} #{s.addresses[:public]}"
-    end; nil
+    header = "#{'NAME'.ljust(20)} #{'STATUS'.ljust(6)} #{'-%-'.ljust(3)} #{'Kind'.ljust(10)} Public IP\n"
+    info = server_objs.inject('') do |acc, s|
+      acc += "#{s.name.ljust(20)} #{s.status.ljust(6)} #{s.progress.to_s.ljust(3)} #{s.flavor.name.ljust(10)} #{s.addresses[:public]}\n"
+    end
+    header + info
   end
 
   def provisioning?
@@ -73,5 +74,4 @@ class Nephele::Rackspace < Nephele::Base
       acc << CloudServers::Image.new(conn, info[:id]); acc
     end
   end
-
 end
