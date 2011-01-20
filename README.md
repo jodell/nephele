@@ -13,4 +13,5 @@ Planned support:
 
 Other Interesting Projects
 --------------------------
-EC2 DSL - https://github.com/auser/poolparty
+* Fog - https://github.com/geemus/fog
+* EC2 DSL - https://github.com/auser/poolparty

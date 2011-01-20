@@ -18,19 +18,26 @@ end
 
 def default_service
   {
-    :service => ENV['NEPHELE_SERVICE_DEFAULT'].downcase.to_sym || :rackspace,
+    :service => ENV['NEPHELE_SERVICE_DEFAULT'] && 
+                  ENV['NEPHELE_SERVICE_DEFAULT'].downcase.to_sym || 
+                    :rackspace,
     :user    => ENV['RACKSPACE_USER'],
     :key     => ENV['RACKSPACE_KEY']
   }
 end
 
 def default
-  @cloud ||= Nephele.new default_service
+  @@default ||= Nephele.new default_service
 end
 
 desc 'List available servers'
-task :list do
+task :servers do
   ap default.servers
+end
+
+desc 'List available images'
+task :images do
+  ap default.images.map { |i| i[:name] }
 end
 
 desc 'Show node statuses'
@@ -38,11 +45,11 @@ task :status do
   puts default.status
 end
 
-desc 'Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,512 server,3]`'
-task :create, [:name, :image, :flavor, :count] do |t, args|
-  (args[:count].to_i || 1).times do |i|
+desc "Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,'512 server'] count=4`"
+task :create, [:name, :image, :flavor] do |t, args|
+  (ENV['count'].to_i || 1).times do |i|
     default.create \
-      :name   => "#{args[:name]}#{i + 1}",
+      :name   => args[:name] + "#{ENV['count'] ? i + 1 : ''}",
       :image  => args[:image],
       :flavor => args[:flavor]
   end
@@ -50,13 +57,10 @@ end
 
 desc 'Destroy a node with name `rake destroy[foo]`'
 task :destroy, [:name] do |t, args|
-  # FIXME
-  default.send(args[:name]).delete!
+  default.server_objs.find { |s| s.name == args[:name] }.delete!
 end
 
 desc 'Start IRB with the relevant env'
 task :console do
-  ARGV.clear
-  default
-  IRB.start
+  ARGV.clear and IRB.start
 end
