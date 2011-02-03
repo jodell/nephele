@@ -56,12 +56,12 @@ end
 
 desc 'Reset the node password (performs a reboot)'
 task :password, [:node, :pass] do |t, args|
-  default.server_objs.find { |s| s.name == args[:name] }.update(:password => args[:pass])
+  default.server_objs.find { |s| s.name == args[:node] }.update(:adminPass => args[:pass])
 end
 
 desc 'Save an image of the node'
 task :save, [:node, :name] do |t, args|
-  default.server_objs.find { |s| s.name == args[:name] }.create_image args[:name]
+  default.server_objs.find { |s| s.name == args[:node] }.create_image args[:name]
 end
 
 desc "Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,'512 server'] count=4`"
