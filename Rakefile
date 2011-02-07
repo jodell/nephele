@@ -54,6 +54,11 @@ task :status do
   puts default.status
 end
 
+desc 'Key a host'
+task :key, [:host] do |t, args|
+  sh %{ssh root@#{args[:host]} 'mkdir -p ~/.ssh && echo "#{my_default_key}" >> ~/.ssh/authorized_keys'}
+end
+
 desc 'Reset the node password (performs a reboot)'
 task :password, [:node, :pass] do |t, args|
   default.server_objs.find { |s| s.name == args[:node] }.update(:adminPass => args[:pass])
@@ -64,13 +69,32 @@ task :save, [:node, :name] do |t, args|
   default.server_objs.find { |s| s.name == args[:node] }.create_image args[:name]
 end
 
+def personality
+  if ENV['personality']
+    acc = {}
+    ENV['personality'].split(',').each_slice(2) { |(k, v)| acc[k] = v }
+    acc
+  else
+    { generate_key_file => '/root/.ssh/authorized_keys' }
+  end
+end
+
+def generate_key_file
+  File.open('/tmp/nephele_key_file', 'w') { |f| f << my_default_key } && '/tmp/nephele_key_file'
+end
+
+def my_default_key
+  File.read(File.expand_path('~/.ssh/id_dsa.pub')).chomp
+end
+
 desc "Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,'512 server'] count=4`"
 task :create, [:name, :image, :flavor] do |t, args|
   (ENV['count'] || 1).to_i.times do |i|
     default.create \
-      :name   => args[:name] + "#{ENV['count'] ? i + 1 : ''}",
-      :image  => args[:image],
-      :flavor => args[:flavor]
+      :name        => args[:name] + "#{ENV['count'] ? i + 1 : ''}",
+      :image       => args[:image],
+      :flavor      => args[:flavor],
+      :personality => personality
   end
 end
 

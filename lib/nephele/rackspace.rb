@@ -27,9 +27,10 @@ class Nephele::Rackspace < Nephele::Base
 
   def create(opts)
     rack_node = conn.create_server \
-      :name     => opts[:name],
-      :imageId  => images_id_for_name(opts[:image]),
-      :flavorId => flavors_id_for_name(opts[:flavor])
+      :name        => opts[:name],
+      :imageId     => images_id_for_name(opts[:image]),
+      :flavorId    => flavors_id_for_name(opts[:flavor]),
+      :personality => opts[:personality] || ''
     puts "Server pass: #{rack_node.adminPass}, ip #{rack_node.addresses[:public]}"
     register!(rack_node)
     rack_node
