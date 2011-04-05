@@ -1,5 +1,4 @@
-require 'bundler'
-Bundler.setup
+require 'bundler/setup'
 require 'rake'
 require 'rake/testtask'
 require 'ap'
@@ -39,6 +38,8 @@ task :servers do
   ap default.servers.map { |i| i[:name] }
 end
 
+task :list => :servers
+
 desc 'List available images'
 task :images do
   ap default.images.map { |i| i[:name] }
@@ -56,7 +57,15 @@ end
 
 desc 'Key a host'
 task :key, [:host] do |t, args|
-  sh %{ssh root@#{args[:host]} 'mkdir -p ~/.ssh && echo "#{my_default_key}" >> ~/.ssh/authorized_keys'}
+  host = args[:host] =~ /(.*)@(.*)/ ? args[:host] : "root@#{args[:host]}"
+  user = ENV['user'] || 'root'
+  home = user == 'root' ? '/root' : "~#{user}"
+  cmd = <<-EoC
+ssh #{host} 'mkdir -p #{home}/.ssh && \
+echo "#{my_default_key}" >> #{home}/.ssh/authorized_keys && \
+chown -R #{user}:#{user} #{home}/.ssh'
+EoC
+  sh cmd
 end
 
 desc 'Reset the node password (performs a reboot)'
@@ -80,22 +89,40 @@ def personality
 end
 
 def generate_key_file
-  File.open('/tmp/nephele_key_file', 'w') { |f| f << my_default_key } && '/tmp/nephele_key_file'
+  '/tmp/nephele_key_file'.tap do |file| File.open(file, 'w') { |f| f << my_default_key }; end
 end
 
 def my_default_key
-  File.read(File.expand_path('~/.ssh/id_dsa.pub')).chomp
+  File.read(File.expand_path('~/.ssh/id_dsa.pub'))
 end
 
 desc "Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,'512 server'] count=4`"
 task :create, [:name, :image, :flavor] do |t, args|
   (ENV['count'] || 1).to_i.times do |i|
-    default.create \
+    @node = default.create \
       :name        => args[:name] + "#{ENV['count'] ? i + 1 : ''}",
-      :image       => args[:image],
+      :image       => lookup(args[:image]),
       :flavor      => args[:flavor],
       :personality => personality
   end
+end
+
+# FIXME
+def lookup(image)
+  case image
+  when /lucid/
+    "Ubuntu 10.04 LTS (lucid)"
+  else
+    image
+  end
+end
+
+JODELL_CHEF_BOOTSTRAPPER = 'https://github.com/jodell/cookbooks/raw/master/bin/bootstrap.sh'
+
+desc 'Create a VM and run a chef bootstrapper, optional recipe arg'
+task :bootstrap, [:name, :image, :flavor] => :create do |t, args|
+  sh %-ssh root@#{@node.addresses[:public]} "curl #{JODELL_CHEF_BOOTSTRAPPER } | bash"-
+  sh %{ssh root@#{@node.addresses[:public]} "cd -P /var/chef/cookbooks && rake run[#{ENV['recipe']}]"} if ENV['recipe']
 end
 
 desc 'Destroy a node with name `rake destroy[foo]`'
