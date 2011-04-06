@@ -84,7 +84,8 @@ def personality
     ENV['personality'].split(',').each_slice(2) { |(k, v)| acc[k] = v }
     acc
   else
-    { generate_key_file => '/root/.ssh/authorized_keys' }
+    { generate_key_file => '/root/.ssh/authorized_keys',
+      known_hosts_file => '/root/.ssh/known_hosts' }
   end
 end
 
@@ -94,6 +95,18 @@ end
 
 def my_default_key
   File.read(File.expand_path('~/.ssh/id_dsa.pub'))
+end
+
+def known_hosts_file
+  '/tmp/known_hosts.nephele'.tap do |file| File.open(file, 'w') { |f| f << known_hosts }; end
+end
+
+# Github
+def known_hosts
+  <<-EoS
+|1|xLwg2PqKMACZR+6X0OH9rx66p1I=|xR01sH66lqU3PejWe+8J0EWulb0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+|1|juutFPHnSpo61K6I1Y7XnKB07yI=|u/ZYrJrAdgQ1G/cd48si2avBHTQ= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+EoS
 end
 
 desc "Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,'512 server'] count=4`"
@@ -119,10 +132,12 @@ end
 
 JODELL_CHEF_BOOTSTRAPPER = 'https://github.com/jodell/cookbooks/raw/master/bin/bootstrap.sh'
 
-desc 'Create a VM and run a chef bootstrapper, optional recipe arg'
+desc 'Create a VM and run a chef bootstrapper, optional recipe, bootstrap, cookbooks args'
 task :bootstrap, [:name, :image, :flavor] => :create do |t, args|
   puts "Bootstrapping: #{args[:name]}..."
-  sh %-time ssh root@#{@node.addresses[:public]} "curl #{ENV['bootstrap'] || JODELL_CHEF_BOOTSTRAPPER} | bash"-
+  bootstrapper = ENV['bootstrap'] || JODELL_CHEF_BOOTSTRAPPER
+  alt = ENV['cookbooks']
+  sh %-time ssh root@#{@node.addresses[:public]} "curl #{bootstrapper} > boot && chmod +x boot && ./boot #{alt}"-
   sh %{time ssh root@#{@node.addresses[:public]} "cd -P /var/chef/cookbooks && rake run[#{ENV['recipe']}]"} if ENV['recipe']
 end
 
