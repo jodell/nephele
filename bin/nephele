@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'optitron'
+#require 'nephele'
+
+class NepheleRunner < Optitron::CLI
+  desc 'Create a VM'
+  def create(name_string)
+
+  end
+
+  desc 'Show nodes'
+  def list
+  end
+end
+
+NepheleRunner.dispatch
