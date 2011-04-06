@@ -121,15 +121,17 @@ JODELL_CHEF_BOOTSTRAPPER = 'https://github.com/jodell/cookbooks/raw/master/bin/b
 
 desc 'Create a VM and run a chef bootstrapper, optional recipe arg'
 task :bootstrap, [:name, :image, :flavor] => :create do |t, args|
-  sh %-ssh root@#{@node.addresses[:public]} "curl #{JODELL_CHEF_BOOTSTRAPPER } | bash"-
-  sh %{ssh root@#{@node.addresses[:public]} "cd -P /var/chef/cookbooks && rake run[#{ENV['recipe']}]"} if ENV['recipe']
+  puts "Bootstrapping: #{args[:name]}..."
+  sh %-time ssh root@#{@node.addresses[:public]} "curl #{ENV['bootstrap'] || JODELL_CHEF_BOOTSTRAPPER} | bash"-
+  sh %{time ssh root@#{@node.addresses[:public]} "cd -P /var/chef/cookbooks && rake run[#{ENV['recipe']}]"} if ENV['recipe']
 end
 
 desc 'Destroy, bootstrap'
-task :restrap, [:name, :image, :flavor] => [:destroy, :create]
+task :restrap, [:name, :image, :flavor] => [:destroy, :bootstrap]
 
 desc 'Destroy a node with name `rake destroy[foo]`'
 task :destroy, [:name] do |t, args|
+  puts "Destroying: #{args[:name]}"
   default.server_objs.find { |s| s.name == args[:name] }.delete!
 end
 
