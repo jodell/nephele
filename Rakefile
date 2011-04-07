@@ -1,15 +1,34 @@
-require 'bundler/setup'
+require 'rubygems'
+
+begin
+  require 'bundler'
+  Bundler.setup(:default, :development)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+
 require 'rake'
 require 'rake/testtask'
+require 'json'
+require 'jeweler'
 require 'ap'
 require 'irb'
-
 $: << File.expand_path(File.dirname(__FILE__) + '/lib')
 require 'nephele'
 
+Jeweler::Tasks.new do |gem|
+  gem.name = "nephele"
+  gem.summary = %-Light administration utility for popular cloud services-
+  gem.description = %-Light administration utility for popular cloud services-
+  gem.email = 'jeffrey.odell@gmail.com'
+  gem.authors = ["Jeffrey O'Dell"]
+end
+
 task :default => :'test:unit'
 
-task :tags do 
+task :tags do
   sh 'ctags -R *'
 end
 
@@ -20,13 +39,11 @@ Rake::TestTask.new('test:unit') do |t|
 end
 
 def default_service
-  {
-    :service => ENV['NEPHELE_SERVICE_DEFAULT'] && 
+  { :service => ENV['NEPHELE_SERVICE_DEFAULT'] && 
                   ENV['NEPHELE_SERVICE_DEFAULT'].downcase.to_sym || 
                     :rackspace,
     :user    => ENV['RACKSPACE_USER'],
-    :key     => ENV['RACKSPACE_KEY']
-  }
+    :key     => ENV['RACKSPACE_KEY'] }
 end
 
 def default
