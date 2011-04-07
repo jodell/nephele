@@ -13,8 +13,18 @@ module Nephele
       Nephele::Rackspace.new :key => opts[:key], :user => opts[:user]
     when :ec2
       raise 'Not Implemented Yet'
+    when :default
+      Nephele::Rackspace.new default
     else
       raise "Unsupported service, expected one of #{SERVICES * ', '}"
     end
+  end
+
+  def self.default
+    { :service => ENV['NEPHELE_SERVICE_DEFAULT'] &&
+                    ENV['NEPHELE_SERVICE_DEFAULT'].downcase.to_sym ||
+                      :rackspace,
+      :user    => ENV['RACKSPACE_USER'],
+      :key     => ENV['RACKSPACE_KEY'] }
   end
 end

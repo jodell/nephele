@@ -1,8 +1,7 @@
-
-Nepheles
+Nephele
 ========
 
-Nepheles is a thin abstraction layer around major cloud service API's.
+Nephele is a thin abstraction layer around major cloud service API's.
 
 Its main goals are simplicity and the unification of common tasks for the sake of working with a set of services.
 

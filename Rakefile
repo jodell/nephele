@@ -24,6 +24,7 @@ Jeweler::Tasks.new do |gem|
   gem.description = %-Light administration utility for popular cloud services-
   gem.email = 'jeffrey.odell@gmail.com'
   gem.authors = ["Jeffrey O'Dell"]
+  gem.executables = ['nephele']
 end
 
 task :default => :'test:unit'
@@ -38,16 +39,8 @@ Rake::TestTask.new('test:unit') do |t|
   t.verbose = true
 end
 
-def default_service
-  { :service => ENV['NEPHELE_SERVICE_DEFAULT'] && 
-                  ENV['NEPHELE_SERVICE_DEFAULT'].downcase.to_sym || 
-                    :rackspace,
-    :user    => ENV['RACKSPACE_USER'],
-    :key     => ENV['RACKSPACE_KEY'] }
-end
-
 def default
-  @@default ||= Nephele.new default_service
+  @@default ||= Nephele.new :service => :default
 end
 
 desc 'List available servers'
@@ -95,55 +88,14 @@ task :save, [:node, :name] do |t, args|
   default.server_objs.find { |s| s.name == args[:node] }.create_image args[:name]
 end
 
-def personality
-  if ENV['personality']
-    acc = {}
-    ENV['personality'].split(',').each_slice(2) { |(k, v)| acc[k] = v }
-    acc
-  else
-    { generate_key_file => '/root/.ssh/authorized_keys',
-      known_hosts_file => '/root/.ssh/known_hosts' }
-  end
-end
-
-def generate_key_file
-  '/tmp/nephele_key_file'.tap do |file| File.open(file, 'w') { |f| f << my_default_key }; end
-end
-
-def my_default_key
-  File.read(File.expand_path('~/.ssh/id_dsa.pub'))
-end
-
-def known_hosts_file
-  '/tmp/known_hosts.nephele'.tap do |file| File.open(file, 'w') { |f| f << known_hosts }; end
-end
-
-# Github
-def known_hosts
-  <<-EoS
-|1|xLwg2PqKMACZR+6X0OH9rx66p1I=|xR01sH66lqU3PejWe+8J0EWulb0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-|1|juutFPHnSpo61K6I1Y7XnKB07yI=|u/ZYrJrAdgQ1G/cd48si2avBHTQ= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-EoS
-end
-
 desc "Creates a node with name, image name, flavor, optional count:  `rake create[mybox,oberon,'512 server'] count=4`"
 task :create, [:name, :image, :flavor] do |t, args|
   (ENV['count'] || 1).to_i.times do |i|
     @node = default.create \
       :name        => args[:name] + "#{ENV['count'] ? i + 1 : ''}",
-      :image       => lookup(args[:image]),
+      :image       => Nephele::Rackspace.image_lookup(args[:image]),
       :flavor      => args[:flavor],
-      :personality => personality
-  end
-end
-
-# FIXME
-def lookup(image)
-  case image
-  when /lucid/
-    "Ubuntu 10.04 LTS (lucid)"
-  else
-    image
+      :personality => Nephele::Rackspace::Util.personality(ENV['personality'] || :default)
   end
 end
 

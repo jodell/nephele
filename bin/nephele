@@ -2,17 +2,89 @@
 
 require 'rubygems'
 require 'optitron'
-#require 'nephele'
+begin
+  require 'nephele'
+rescue LoadError
+  $: << File.expand_path(File.dirname(__FILE__) + '/../lib')
+  require 'nephele'
+end
+#require 'ap'
 
-class NepheleRunner < Optitron::CLI
-  desc 'Create a VM'
-  def create(name_string)
+class Nephele::Runner < Optitron::CLI
+  JODELL_CHEF_BOOTSTRAPPER = 'https://github.com/jodell/cookbooks/raw/master/bin/bootstrap.sh'
+  class_opt 'cookbooks', "optional cookbooks URI", :type => :string
+  class_opt 'personality', 'comma-separated tuple of contents,targetfile to be placed at startup', :type => :string
+  class_opt 'bootstrap', "optional bootstrapper URI, defaults to #{JODELL_CHEF_BOOTSTRAPPER}", :type => :string
+  class_opt 'recipe', "run this recipe after bootstrapping", :type => :string
 
+  desc 'Display a list of servers'
+  def list
+    puts service.servers.map { |i| i[:name] }
   end
 
-  desc 'Show nodes'
-  def list
+  desc 'Display available images'
+  def images
+    puts default.images.map { |i| i[:name] }
+  end
+
+  desc 'List available flavors'
+  def flavors
+    puts service.flavors.map { |i| i[:name] }
+  end
+
+  desc 'Display server status'
+  def status
+    puts service.status
+  end
+
+  desc 'Change a password on given node'
+  def password(node_string, password_string)
+    service.server_objs.find { |s| s.name == node_string }.update(:adminPass => password_string)
+  end
+
+  desc 'Save an image of the node'
+  def save(node_string, savename_string)
+    service.server_objs.find { |s| s.name == node_string }.create_image name_string
+  end
+
+  desc "Creates a node with name, image name, flavor"
+  opt 'count', 'create foo, foo2, foo3, ...', :type => :numeric
+  def create(name, image, flavor)
+    (params['count'] || 1).to_i.times do |i|
+      @node = service.create \
+        :name        => name + "#{params['count'] ? i + 1 : ''}",
+        :image       => Nephele::Rackspace.image_lookup(image),
+        :flavor      => flavor,
+        :personality => Nephele::Rackspace::Util.personality(params['personality'] || :default)
+    end
+  end
+
+  desc 'Create a VM and run a chef bootstrapper, optional recipe, bootstrap, cookbooks args'
+  def bootstrap(name, image, flavor)
+    puts "Bootstrapping: #{name}..."
+    create name, image, flavor
+    bootstrap = params['bootstrap'] || JODELL_CHEF_BOOTSTRAPPER
+    system %-time ssh root@#{@node.addresses[:public]} "curl #{bootstrap} > boot && chmod +x boot && ./boot #{params['cookbooks'] || ''}"-
+    system %{time ssh root@#{@node.addresses[:public]} "cd -P /var/chef/cookbooks && rake run[#{params['recipe']}]"} if params['recipe']
+  end
+
+  desc 'Destroy and bootstrap'
+  def restrap(name, image, flavor)
+    destroy name
+    bootstrap name, image, flavor
+  end
+
+  desc 'Destroy a given node'
+  def destroy(name_string)
+    if node = service.server_objs.find { |s| s.name == name_string }
+      puts "Destroying: #{name_string}"
+      node.delete!
+    end
+  end
+
+  def service
+    @@service ||= Nephele.new(:service => :default)
   end
 end
 
-NepheleRunner.dispatch
+Nephele::Runner.dispatch

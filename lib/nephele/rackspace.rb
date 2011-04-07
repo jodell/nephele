@@ -75,4 +75,48 @@ class Nephele::Rackspace < Nephele::Base
       acc << CloudServers::Image.new(conn, info[:id]); acc
     end
   end
+
+  def self.image_lookup(name)
+    case name
+    when /lucid/
+      "Ubuntu 10.04 LTS (lucid)"
+    else
+      name
+    end
+  end
+end
+
+module Nephele::Rackspace::Util
+  class << self
+    def personality(personality)
+      if personality == :default
+        { generate_key_file => '/root/.ssh/authorized_keys',
+          known_hosts_file => '/root/.ssh/known_hosts' }
+      else
+        acc = {}
+        personality.split(',').each_slice(2) { |(k, v)| acc[k] = v }
+        acc
+      end
+    end
+
+    def generate_key_file
+      '/tmp/nephele_key_file'.tap do |file| File.open(file, 'w') { |f| f << my_default_key }; end
+    end
+
+    def my_default_key
+      File.read(File.expand_path('~/.ssh/id_dsa.pub'))
+    end
+
+    def known_hosts_file
+      '/tmp/known_hosts.nephele'.tap do |file| File.open(file, 'w') { |f| f << known_hosts }; end
+    end
+
+    # Github
+    def known_hosts
+      <<-EoS
+    |1|xLwg2PqKMACZR+6X0OH9rx66p1I=|xR01sH66lqU3PejWe+8J0EWulb0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+    |1|juutFPHnSpo61K6I1Y7XnKB07yI=|u/ZYrJrAdgQ1G/cd48si2avBHTQ= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+    EoS
+    end
+  end
 end
