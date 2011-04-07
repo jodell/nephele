@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
     "test/helper.rb",
     "test/tc_base.rb"
   ]
+  s.homepage = %q{https://github.com/jodell/nephele}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.6.1}
   s.summary = %q{Light administration utility for popular cloud services}

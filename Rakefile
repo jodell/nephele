@@ -25,6 +25,7 @@ Jeweler::Tasks.new do |gem|
   gem.email = 'jeffrey.odell@gmail.com'
   gem.authors = ["Jeffrey O'Dell"]
   gem.executables = ['nephele']
+  gem.homepage  = 'https://github.com/jodell/nephele'
 end
 
 task :default => :'test:unit'
