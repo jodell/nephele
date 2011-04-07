@@ -24,7 +24,7 @@ class Nephele::Runner < Optitron::CLI
 
   desc 'Display available images'
   def images
-    puts default.images.map { |i| i[:name] }
+    puts service.images.map { |i| i[:name] }
   end
 
   desc 'List available flavors'
