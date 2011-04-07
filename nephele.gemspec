@@ -24,11 +24,13 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.md",
     "Rakefile",
+    "VERSION",
     "bin/nephele",
     "lib/nephele.rb",
     "lib/nephele/base.rb",
     "lib/nephele/node.rb",
     "lib/nephele/rackspace.rb",
+    "nephele.gemspec",
     "test/helper.rb",
     "test/tc_base.rb"
   ]
