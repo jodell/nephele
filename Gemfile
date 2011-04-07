@@ -12,5 +12,7 @@ group :development do
   gem 'autotest'
   gem 'autotest-fsevent'
   gem 'autotest-growl'
+  gem 'bundler'
+  gem 'jeweler', '~>1.5.2'
 end
 
