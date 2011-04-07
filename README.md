@@ -1,14 +1,24 @@
 Nephele
 ========
-
-Nephele is a thin abstraction layer around major cloud service API's.
-
-Its main goals are simplicity and the unification of common tasks for the sake of working with a set of services.
+Nephele is a thin administration layer around major cloud service API's.
+Its main goals are simplicity and a unified command line interface for common tasks.
 
 Planned support:
 
 * Rackspace
 * EC2
+
+Setting Your Credentials
+------------------------
+Currently, Nephele expects environment variables to set your service keys.
+
+    RACKSPACE_KEY=your_api_key
+    RACKSPACE_USER=your_user_name
+    NEPHELE_SERVICE_DEFAULT=rackspace
+
+LICENSE
+-------
+SEE LICENSE
 
 Other Interesting Projects
 --------------------------
