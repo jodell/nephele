@@ -2,3 +2,4 @@
 tags
 pkg
 Gemfile.lock
+*.gem
