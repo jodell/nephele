@@ -5,18 +5,18 @@
 
 Gem::Specification.new do |s|
   s.name = %q{nephele}
-  s.version = "0.1.0"
+  s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeffrey O'Dell"]
-  s.date = %q{2011-04-07}
-  s.default_executable = %q{nephele}
+  s.date = %q{2011-04-11}
   s.description = %q{Light administration utility for popular cloud services}
   s.email = %q{jeffrey.odell@gmail.com}
-  s.executables = ["nephele"]
+  s.executables = ["neph", "nephele"]
   s.extra_rdoc_files = [
     "LICENSE",
-    "README.md"
+    "README.md",
+    "TODO"
   ]
   s.files = [
     ".autotest",
@@ -24,7 +24,9 @@ Gem::Specification.new do |s|
     "LICENSE",
     "README.md",
     "Rakefile",
+    "TODO",
     "VERSION",
+    "bin/neph",
     "bin/nephele",
     "lib/nephele.rb",
     "lib/nephele/base.rb",
