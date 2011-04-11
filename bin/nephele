@@ -8,6 +8,7 @@ rescue LoadError
   $: << File.expand_path(File.dirname(__FILE__) + '/../lib')
   require 'nephele'
 end
+# awesome_print doesn't seem to play nice with optitron?
 #require 'ap'
 
 class Nephele::Runner < Optitron::CLI
