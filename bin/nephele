@@ -17,6 +17,7 @@ class Nephele::Runner < Optitron::CLI
   class_opt 'personality', 'comma-separated tuple of contents,targetfile to be placed at startup', :type => :string
   class_opt 'bootstrap', "optional bootstrapper URI, defaults to #{JODELL_CHEF_BOOTSTRAPPER}", :type => :string
   class_opt 'recipe', "run this recipe after bootstrapping", :type => :string
+  class_opt 'vpn-credential-file', 'specify a vpnpass file to seed the target vm', :type => :string
 
   desc 'Display a list of servers'
   def list
@@ -51,12 +52,17 @@ class Nephele::Runner < Optitron::CLI
   desc "Creates a node with name, image name, flavor"
   opt 'count', 'create foo, foo2, foo3, ...', :type => :numeric
   def create(name, image, flavor)
+    personality = Nephele::Rackspace::Util.personality(params['personality'] || :default)
+    if vpnfile = params['vpn-credential-file']
+      personality.delete_if { |k, v| v == '/root/.vpnpass' }
+      personality[vpnfile] = '/root/.vpnpass'
+    end
     (params['count'] || 1).to_i.times do |i|
       @node = service.create \
         :name        => name + "#{params['count'] ? i + 1 : ''}",
         :image       => Nephele::Rackspace.image_lookup(image),
         :flavor      => flavor,
-        :personality => Nephele::Rackspace::Util.personality(params['personality'] || :default)
+        :personality => personality
     end
   end
 

@@ -27,6 +27,12 @@ Jeweler::Tasks.new do |gem|
   gem.homepage  = 'https://github.com/jodell/nephele'
 end
 
+desc 'rubygems.org publishing'
+task :push do
+  ver = "nephele-#{File.read(VERSION)}"
+  sh "gem build #{ver}.gemspec && gem push #{ver}.gem && rm #{ver}.gem"
+end
+
 task :default => :'test:unit'
 
 task :tags do
