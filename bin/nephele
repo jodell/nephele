@@ -2,10 +2,11 @@
 
 require 'rubygems'
 require 'optitron'
-begin
-  require 'nephele'
-rescue LoadError
+
+if __FILE__ =~ /bin\/neph/
   $: << File.expand_path(File.dirname(__FILE__) + '/../lib')
+  require 'nephele'
+else
   require 'nephele'
 end
 # awesome_print doesn't seem to play nice with optitron?
@@ -72,6 +73,11 @@ class Nephele::Runner < Optitron::CLI
   desc 'Change a password on given node'
   def password(node_string, password_string)
     service.server_objs.find { |s| s.name == node_string }.update(:adminPass => password_string)
+  end
+
+  desc 'Delete an image'
+  def delete(image)
+    service.delete_image image
   end
 
   desc 'Create a VM and run a chef bootstrapper, optional recipe, bootstrap, cookbooks args'

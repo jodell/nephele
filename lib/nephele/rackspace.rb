@@ -42,6 +42,10 @@ class Nephele::Rackspace < Nephele::Base
     @nodes.delete_if { |n| n.id == id }
   end
 
+  def delete_image(image)
+    del = image_objs.find { |i| i.name == image } && del.delete!
+  end
+
   def status
     header = "#{'NAME'.ljust(20)} #{'STATUS'.ljust(6)} #{'-%-'.ljust(3)} #{'Kind'.ljust(10)} Public IP\n"
     info = server_objs.inject('') do |acc, s|
