@@ -105,9 +105,9 @@ module Nephele::Rackspace::Util
     end
 
     def my_default_key(keyfile = File.expand_path('~/.ssh/id_dsa.pub'))
-      return File.read(keyfile) if File.exists?(keyfile)
+      return keyfile if File.exists?(keyfile)
       alt = File.expand_path('~/.ssh/id_rsa.pub')
-      return File.read(alt) if File.exists?(alt)
+      return alt if File.exists?(alt)
     end
 
     def known_hosts_file
