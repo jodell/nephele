@@ -94,9 +94,9 @@ module Nephele::Rackspace::Util
   class << self
     def personality(personality)
       if personality == :default
-        { generate_key_file => '/root/.ssh/authorized_keys',
-          known_hosts_file => '/root/.ssh/known_hosts',
-          vpn_pass_file => '/root/.vpnpass' }
+        base = { my_default_key   => '/root/.ssh/authorized_keys',
+                 known_hosts_file => '/root/.ssh/known_hosts' }
+        vpn_pass_file ? base.merge({ vpn_pass_file => '/root/.vpnpass' }) : base
       else
         acc = {}
         personality.split(',').each_slice(2) { |(k, v)| acc[k] = v }
@@ -104,12 +104,10 @@ module Nephele::Rackspace::Util
       end
     end
 
-    def generate_key_file
-      '/tmp/nephele_key_file'.tap do |file| File.open(file, 'w') { |f| f << my_default_key }; end
-    end
-
     def my_default_key(keyfile = File.expand_path('~/.ssh/id_dsa.pub'))
-      File.read(keyfile)
+      return File.read(keyfile) if File.exists?(keyfile)
+      alt = File.expand_path('~/.ssh/id_rsa.pub')
+      return File.read(alt) if File.exists?(alt)
     end
 
     def known_hosts_file
