@@ -82,7 +82,7 @@ class Nephele::Rackspace < Nephele::Base
 
   def self.image_lookup(name)
     case name
-    when /lucid/
+    when /^lucid$/
       "Ubuntu 10.04 LTS (lucid)"
     else
       name
