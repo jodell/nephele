@@ -39,16 +39,6 @@ class Nephele::Runner < Optitron::CLI
     puts service.status
   end
 
-  desc 'Change a password on given node'
-  def password(node_string, password_string)
-    service.server_objs.find { |s| s.name == node_string }.update(:adminPass => password_string)
-  end
-
-  desc 'Save an image of the node'
-  def save(node_string, savename_string)
-    service.server_objs.find { |s| s.name == node_string }.create_image name_string
-  end
-
   desc "Creates a node with name, image name, flavor"
   opt 'count', 'create foo, foo2, foo3, ...', :type => :numeric
   def create(name, image, flavor)
@@ -66,6 +56,24 @@ class Nephele::Runner < Optitron::CLI
     end
   end
 
+  desc 'Save an image of the node'
+  def save(nodename, savename)
+    service.server_objs.find { |s| s.name == nodename }.create_image savename
+  end
+
+  desc 'Destroy a given node'
+  def destroy(name_string)
+    if node = service.server_objs.find { |s| s.name == name_string }
+      puts "Destroying: #{name_string}"
+      node.delete!
+    end
+  end
+
+  desc 'Change a password on given node'
+  def password(node_string, password_string)
+    service.server_objs.find { |s| s.name == node_string }.update(:adminPass => password_string)
+  end
+
   desc 'Create a VM and run a chef bootstrapper, optional recipe, bootstrap, cookbooks args'
   def bootstrap(name, image, flavor)
     puts "Bootstrapping: #{name}..."
@@ -81,12 +89,10 @@ class Nephele::Runner < Optitron::CLI
     bootstrap name, image, flavor
   end
 
-  desc 'Destroy a given node'
-  def destroy(name_string)
-    if node = service.server_objs.find { |s| s.name == name_string }
-      puts "Destroying: #{name_string}"
-      node.delete!
-    end
+  desc 'Boostrap a VM and save an image of it'
+  def archive(name, image, flavor, savename)
+    bootstrap name, image, flavor
+    save name, savename
   end
 
   def service
