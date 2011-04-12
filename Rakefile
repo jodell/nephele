@@ -29,7 +29,7 @@ end
 
 desc 'rubygems.org publishing'
 task :push do
-  ver = "nephele-#{File.read(VERSION)}"
+  ver = "nephele-#{File.read('VERSION')}"
   sh "gem build #{ver}.gemspec && gem push #{ver}.gem && rm #{ver}.gem"
 end
 
