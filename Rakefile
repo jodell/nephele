@@ -28,7 +28,7 @@ Jeweler::Tasks.new do |gem|
 end
 
 desc 'rubygems.org publishing'
-task :push do
+task :push => :release do
   ver = "nephele-#{File.read('VERSION')}"
   sh "gem build nephele.gemspec; gem push #{ver}.gem && rm #{ver}.gem"
 end
