@@ -53,7 +53,7 @@ class Nephele::Runner < Optitron::CLI
   opt 'count', 'create foo, foo2, foo3, ...', :type => :numeric
   def create(name, image, flavor)
     personality = Nephele::Rackspace::Util.personality(params['personality'] || :default)
-    if vpnfile = params['vpn-credential-file']
+    if vpnfile = params['vpn-credential-file'] && !vpnfile.empty?
       personality.delete_if { |k, v| v == '/root/.vpnpass' }
       personality[vpnfile] = '/root/.vpnpass'
     end
