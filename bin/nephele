@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'optitron'
 
-if __FILE__ =~ /bin\/neph/
+if __FILE__ =~ /bin\/neph$/
   $: << File.expand_path(File.dirname(__FILE__) + '/../lib')
   require 'nephele'
 else
@@ -14,11 +14,12 @@ end
 
 class Nephele::Runner < Optitron::CLI
   JODELL_CHEF_BOOTSTRAPPER = 'https://github.com/jodell/cookbooks/raw/master/bin/bootstrap.sh'
-  class_opt 'cookbooks', "optional cookbooks URI", :type => :string
-  class_opt 'personality', 'comma-separated tuple of contents,targetfile to be placed at startup', :type => :string
-  class_opt 'bootstrap', "optional bootstrapper URI, defaults to #{JODELL_CHEF_BOOTSTRAPPER}", :type => :string
-  class_opt 'recipe', "run this recipe after bootstrapping", :type => :string
+  class_opt 'cookbooks',           'optional cookbooks URI', :type => :string
+  class_opt 'personality',         'comma-separated tuple of contents,targetfile to be placed at startup', :type => :string
+  class_opt 'bootstrap',           "optional bootstrapper URI, defaults to #{JODELL_CHEF_BOOTSTRAPPER}", :type => :string
+  class_opt 'recipe',              'run this recipe after bootstrapping', :type => :string
   class_opt 'vpn-credential-file', 'specify a vpnpass file to seed the target vm', :type => :string
+  class_opt 'prestrap',            'Executes a command or the contents of a file on a VM prior to bootstrapping', :type => :string
 
   desc 'Display a list of servers'
   def list
@@ -80,13 +81,31 @@ class Nephele::Runner < Optitron::CLI
     service.delete_image image
   end
 
+  ##
+  # neph bootstrap ramsay lucid '512 server' -P "export CHEF_LOG_LEVEL=debug; export CHEF_LOG_LOCATION='chef.log'"
+  #
   desc 'Create a VM and run a chef bootstrapper, optional recipe, bootstrap, cookbooks args'
   def bootstrap(name, image, flavor)
     puts "Bootstrapping: #{name}..."
     create name, image, flavor
     bootstrap = params['bootstrap'] || JODELL_CHEF_BOOTSTRAPPER
-    system %-time ssh root@#{@node.addresses[:public]} "curl #{bootstrap} > boot && chmod +x boot && ./boot #{params['cookbooks'] || ''}"-
-    system %{time ssh root@#{@node.addresses[:public]} "cd -P /var/chef/cookbooks && rake run[#{params['recipe']}]"} if params['recipe']
+    node_run "curl #{bootstrap} > boot && chmod +x boot && ./boot #{params['cookbooks'] || ''}"
+    # This is inaccurate. Prestrapping is just for changing chef-solo's verbosity.
+    #
+    recipe_cmd = [
+      "#{params['prestrap'] ? prestrap_cmd + ' && ' : ''}",
+      "cd -P /var/chef/cookbooks && rake run[#{params['recipe']}]"
+    ].join
+    node_run recipe_cmd if params['recipe']
+  end
+
+  def node_run(cmd)
+    puts "Running #{cmd}" if ENV['verbose']
+    system %-time ssh root@#{@node.addresses[:public]} "#{cmd}"-
+  end
+
+  def prestrap_cmd
+    File.exists?(params['prestrap']) ? File.read(params['prestrap']) : params['prestrap']
   end
 
   desc 'Destroy and bootstrap'
