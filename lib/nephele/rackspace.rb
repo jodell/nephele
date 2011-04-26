@@ -43,7 +43,8 @@ class Nephele::Rackspace < Nephele::Base
   end
 
   def delete_image(image)
-    del = image_objs.find { |i| i.name == image } && del.delete!
+    del = image_objs.find { |i| i.name == image }
+    del.delete!
   end
 
   def status
