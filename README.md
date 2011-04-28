@@ -25,7 +25,7 @@ Here's an example of someone inspecting available images and flavors on a Racksp
 
     neph create foo 'Ubuntu 10.04 LTS (lucid)' '512 server'
 
-    neph create foo 'Ubuntu 10.04 LTS (lucid)' '512 server'
+    neph destroy foo
 
     neph bootstrap foo 'Ubuntu 10.04 LTS (lucid)' '512 server' -r webserver -c git@github.com:joeuser/cookbooks.git
 
