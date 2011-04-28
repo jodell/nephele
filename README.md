@@ -70,6 +70,13 @@ Global options
 -?/--help                                        # Print help message
 </pre>
 
+Extra Hooks
+-----------
+* personality:  Uses the rackspace API hook of dropping custom files onto the new VM at creation time.  By default, your DSA or RSA public key from your home is added to the root user's authorized_key file.
+* vpn credentials:  If you expose a ~/.vpnpass file on the machine where nephele is invoked, this will get added as a part of the personality of a new VM, ideally used by an openvpn setup on the target.
+* prestrap:  Specific to my bootstrapper at the moment, this allows for twiddling chef-solo log settings at the time of nephele creation.  This will change over time.
+
+
 LICENSE
 -------
 SEE LICENSE
