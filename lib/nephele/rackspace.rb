@@ -1,3 +1,5 @@
+require 'tempfile'
+
 class Nephele::Rackspace < Nephele::Base
   attr_reader :nodes
 
@@ -97,7 +99,8 @@ module Nephele::Rackspace::Util
       if personality == :default
         base = { my_default_key   => '/root/.ssh/authorized_keys',
                  known_hosts_file => '/root/.ssh/known_hosts' }
-        vpn_pass_file ? base.merge({ vpn_pass_file => '/root/.vpnpass' }) : base
+        base.merge!({ vpn_pass_file => '/root/.vpnpass' }) if vpn_pass_file
+        base.merge!({ nephele_info_file => '/etc/nephele/info' })
       else
         acc = {}
         personality.split(',').each_slice(2) { |(k, v)| acc[k] = v }
@@ -112,11 +115,22 @@ module Nephele::Rackspace::Util
     end
 
     def known_hosts_file
-      '/tmp/known_hosts.nephele'.tap do |file| File.open(file, 'w') { |f| f << known_hosts }; end
+      Tempfile.new('known_hosts.nephele').tap do |f|
+        f << known_hosts; f.close
+      end.path
     end
 
     def vpn_pass_file(passfile = File.expand_path('~/.vpnpass'))
       File.exists?(passfile) && passfile
+    end
+
+    def nephele_info_file
+      Tempfile.new('nephele-meta').tap do |f|
+        f << [
+          "# Nephele Creation: #{Time.now}",
+          "# Creator: #{ENV['USER']}"
+        ] * "\n"; f.close
+      end.path
     end
 
     # Github
