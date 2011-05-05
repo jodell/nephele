@@ -49,10 +49,29 @@ class Nephele::Rackspace < Nephele::Base
     del.delete!
   end
 
+  def max_size_for(field)
+    server_objs.inject(0) { |acc, so| acc = [acc, so.send(field.to_sym).to_s.length].max }
+  end
+
   def status
-    header = "#{'NAME'.ljust(20)} #{'STATUS'.ljust(6)} #{'-%-'.ljust(3)} #{'Kind'.ljust(10)} Public IP\n"
+    max_name = max_size_for 'name'
+    max_status = max_size_for 'status'
+    max_progress = max_size_for 'progress'
+    header = [
+      'NAME'.ljust(max_name),
+      'STATUS'.ljust(max_status),
+      '-%-'.ljust(max_progress),
+      'Kind'.ljust(10),
+      "Public IP\n"
+    ] * ' '
     info = server_objs.inject('') do |acc, s|
-      acc += "#{s.name.ljust(20)} #{s.status.ljust(6)} #{s.progress.to_s.ljust(3)} #{s.flavor.name.ljust(10)} #{s.addresses[:public]}\n"
+      acc += [
+        s.name.ljust(max_name),
+        s.status.ljust(max_status),
+        s.progress.to_s.ljust(max_progress),
+        s.flavor.name.ljust(10),
+        "#{s.addresses[:public]}\n"
+      ] * ' '
     end
     header + info
   end
