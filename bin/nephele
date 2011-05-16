@@ -56,7 +56,6 @@ class Nephele::Runner < Optitron::CLI
         :flavor      => flavor,
         :personality => personality
     end
-    sleep 5
   end
 
   desc 'Save an image of the node'
@@ -102,7 +101,7 @@ class Nephele::Runner < Optitron::CLI
 
   def node_run(cmd)
     puts "Running #{cmd}" if ENV['verbose']
-    system %-time ssh root@#{@node.addresses[:public]} "#{cmd}"-
+    system %[time ssh -o "StrictHostChecking=no" -A root@#{@node.addresses[:public]} "#{cmd}"]
   end
 
   def prestrap_cmd

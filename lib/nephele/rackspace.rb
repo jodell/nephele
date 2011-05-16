@@ -134,9 +134,7 @@ module Nephele::Rackspace::Util
     end
 
     def known_hosts_file
-      Tempfile.new('known_hosts.nephele').tap do |f|
-        f << known_hosts; f.close
-      end.path
+      File.open('/tmp/known_hosts.nephele') { |f| f << known_hosts; f.path }
     end
 
     def vpn_pass_file(passfile = File.expand_path('~/.vpnpass'))
@@ -144,20 +142,18 @@ module Nephele::Rackspace::Util
     end
 
     def nephele_info_file
-      Tempfile.new('nephele-meta').tap do |f|
-        f << [
-          "# Nephele Creation: #{Time.now}",
-          "# Creator: #{ENV['USER']}"
-        ] * "\n"; f.close
-      end.path
+      File.open("/tmp/nephele-meta", 'w') do |f|
+        f << "# Nephele Creation: #{Time.now}\n# Creator: #{ENV['USER']}"
+        f.path
+      end
     end
 
     # Github
     def known_hosts
       <<-EoS
-    |1|xLwg2PqKMACZR+6X0OH9rx66p1I=|xR01sH66lqU3PejWe+8J0EWulb0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-    |1|juutFPHnSpo61K6I1Y7XnKB07yI=|u/ZYrJrAdgQ1G/cd48si2avBHTQ= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-    EoS
+|1|xLwg2PqKMACZR+6X0OH9rx66p1I=|xR01sH66lqU3PejWe+8J0EWulb0= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+|1|juutFPHnSpo61K6I1Y7XnKB07yI=|u/ZYrJrAdgQ1G/cd48si2avBHTQ= ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+EoS
     end
   end
 end
