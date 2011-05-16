@@ -134,7 +134,7 @@ module Nephele::Rackspace::Util
     end
 
     def known_hosts_file
-      File.open('/tmp/known_hosts.nephele') { |f| f << known_hosts; f.path }
+      File.open('/tmp/known_hosts.nephele', 'w') { |f| f << known_hosts; f.path }
     end
 
     def vpn_pass_file(passfile = File.expand_path('~/.vpnpass'))
