@@ -27,6 +27,9 @@ Jeweler::Tasks.new do |gem|
   gem.homepage  = 'https://github.com/jodell/nephele'
 end
 
+desc 'Convenience task for bumping a patchlevel and publishing'
+task :patch_rel => [:'version:bump:patch', :push]
+
 desc 'rubygems.org publishing'
 task :push => :release do
   ver = "nephele-#{File.read('VERSION')}"
