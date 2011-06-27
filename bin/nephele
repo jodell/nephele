@@ -37,8 +37,8 @@ class Nephele::Runner < Optitron::CLI
   end
 
   desc 'Display server status'
-  def status
-    puts service.status
+  def status(search_string = nil)
+    puts (search_string ? service.status.grep(/#{search_string}/) : service.status)
   end
 
   desc "Creates a node with name, image name, flavor"
@@ -68,6 +68,14 @@ class Nephele::Runner < Optitron::CLI
     if node = service.server_objs.find { |s| s.name == name_string }
       puts "Destroying: #{name_string}"
       node.delete!
+    end
+  end
+
+  desc 'Restart a node'
+  def reboot(name_string)
+    if node = service.server_objs.find { |s| s.name == name_string }
+      puts "Rebooting: #{name_string}"
+      node.reboot
     end
   end
 
