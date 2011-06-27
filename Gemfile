@@ -1,7 +1,7 @@
 source :rubygems
 
 gem 'rake'
-gem 'cloudservers', :tag => 'v0.4.0'
+gem 'cloudservers', '~>0.4'
 gem 'awesome_print'
 gem 'optitron'
 

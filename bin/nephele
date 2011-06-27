@@ -13,7 +13,7 @@ end
 #require 'ap'
 
 class Nephele::Runner < Optitron::CLI
-  JODELL_CHEF_BOOTSTRAPPER = 'https://github.com/jodell/cookbooks/raw/master/bin/bootstrap.sh'
+  JODELL_CHEF_BOOTSTRAPPER = 'https://raw.github.com/jodell/cookbooks/master/bin/bootstrap.sh'
   class_opt 'cookbooks',           'optional cookbooks URI', :type => :string
   class_opt 'personality',         'comma-separated tuple of contents,targetfile to be placed at startup', :type => :string
   class_opt 'bootstrap',           "optional bootstrapper URI, defaults to #{JODELL_CHEF_BOOTSTRAPPER}", :type => :string
@@ -89,7 +89,7 @@ class Nephele::Runner < Optitron::CLI
     puts "Bootstrapping: #{name}..."
     create name, image, flavor
     bootstrap = params['bootstrap'] || JODELL_CHEF_BOOTSTRAPPER
-    node_run "curl #{bootstrap} > boot && chmod +x boot && ./boot #{params['cookbooks'] || ''}"
+    node_run "curl -L #{bootstrap} > boot && chmod +x boot && ./boot #{params['cookbooks'] || ''}"
     # This is inaccurate. Prestrapping is just for changing chef-solo's verbosity.
     #
     recipe_cmd = [
