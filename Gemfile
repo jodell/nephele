@@ -4,15 +4,16 @@ gem 'rake'
 gem 'cloudservers', '~>0.4'
 gem 'awesome_print'
 gem 'optitron'
+gem 'sexp_processor', '~>3.0.5'
 
 group :development do
   gem 'wirble'
   gem 'shoulda'
   gem 'mocha'
   gem 'autotest'
+  gem 'ZenTest', '~>4.4.1'
   gem 'autotest-fsevent'
   gem 'autotest-growl'
-  gem 'bundler'
-  gem 'jeweler', '~>1.5.2'
+  gem 'jeweler'
 end
 
