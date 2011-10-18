@@ -18,6 +18,7 @@ class Nephele::Runner < Optitron::CLI
   class_opt 'personality',         'comma-separated tuple of contents,targetfile to be placed at startup', :type => :string
   class_opt 'bootstrap',           "optional bootstrapper URI, defaults to #{JODELL_CHEF_BOOTSTRAPPER}", :type => :string
   class_opt 'recipe',              'run this recipe after bootstrapping', :type => :string
+  class_opt 'branch',              'Use this branch of a bootstrapper git repo', :type => :string
   class_opt 'vpn-credential-file', 'specify a vpnpass file to seed the target vm', :type => :string
   class_opt 'prestrap',            'Executes a command or the contents of a file on a VM prior to bootstrapping', :type => :string
 
@@ -100,11 +101,17 @@ class Nephele::Runner < Optitron::CLI
     node_run "curl -L #{bootstrap} > boot && chmod +x boot && ./boot #{params['cookbooks'] || ''}"
     # This is inaccurate. Prestrapping is just for changing chef-solo's verbosity.
     #
-    recipe_cmd = [
-      "#{params['prestrap'] ? prestrap_cmd + ' && ' : ''}",
-      "cd -P /var/chef/cookbooks && (bundle check || bundle install) && git fetch && git pull && rake run[#{params['recipe']}]"
-    ].join
-    node_run recipe_cmd if params['recipe']
+    if params['recipe']
+      recipe_cmd = params['prestrap'] ? prestrap_cmd + ' && ' : ''
+      recipe_cmd += [
+        "cd -P /var/chef/cookbooks",
+        "git fetch && git pull",
+        "#{params['branch'] ? 'git checkout -f ' + params['branch'] : ''}",
+        "(bundle check || bundle install)",
+        "rake run[#{params['recipe']}]"
+      ] * ' && '
+      node_run recipe_cmd
+    end
   end
 
   def node_run(cmd)
