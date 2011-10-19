@@ -1,10 +1,13 @@
 require 'tempfile'
+require 'net/http'
 
 class Nephele::Rackspace < Nephele::Base
   attr_reader :nodes
+  attr_accessor :timeout
 
   def initialize(opts = {})
     super
+    @timeout = opts[:timeout] || 180
     populate!
   end
 
@@ -33,8 +36,23 @@ class Nephele::Rackspace < Nephele::Base
       :imageId     => images_id_for_name(opts[:image]),
       :flavorId    => flavors_id_for_name(opts[:flavor]),
       :personality => opts[:personality] || ''
-    puts "Server pass: #{rack_node.adminPass}, ip #{rack_node.addresses[:public]}"
+    puts "Server pass: #{rack_node.adminPass}, ip #{rack_node.addresses[:public].first}"
     register!(rack_node)
+    rack_node
+  end
+
+  def build_and_wait(opts)
+    rack_node = create(opts)
+    t1 = Time.now
+    begin
+      Timeout::timeout(@timeout) do
+        sleep 2 while rack_node.refresh && rack_node.status != 'ACTIVE'
+        sleep 2 while !(TCPSocket.new(rack_node.addresses[:public].first, 22) rescue nil)
+      end
+    rescue Timeout::Error
+      puts "Server creation timed out after #{@timeout} seconds!"
+    end
+    puts "#{rack_node.status}: #{Time.now - t1}" if ENV['verbose']
     rack_node
   end
 
@@ -70,7 +88,7 @@ class Nephele::Rackspace < Nephele::Base
         s.status.ljust(max_status),
         s.progress.to_s.ljust(max_progress),
         s.flavor.name.ljust(10),
-        "#{s.addresses[:public]}\n"
+        "#{s.addresses[:public].first}\n"
       ] * ' '
     end
     header + info

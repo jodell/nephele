@@ -51,7 +51,7 @@ class Nephele::Runner < Optitron::CLI
       personality[vpnfile] = '/root/.vpnpass'
     end
     (params['count'] || 1).to_i.times do |i|
-      @node = service.create \
+      @node = service.build_and_wait \
         :name        => name + "#{params['count'] ? i + 1 : ''}",
         :image       => Nephele::Rackspace.image_lookup(image),
         :flavor      => flavor,
@@ -61,6 +61,7 @@ class Nephele::Runner < Optitron::CLI
 
   desc 'Save an image of the node'
   def save(nodename, savename)
+    puts "Saving #{nodename} -> #{savename}"
     service.server_objs.find { |s| s.name == nodename }.create_image savename
   end
 
@@ -104,19 +105,18 @@ class Nephele::Runner < Optitron::CLI
     if params['recipe']
       recipe_cmd = params['prestrap'] ? prestrap_cmd + ' && ' : ''
       recipe_cmd += [
-        "cd -P /var/chef/cookbooks",
-        "git fetch && git pull",
-        "#{params['branch'] ? 'git checkout -f ' + params['branch'] : ''}",
-        "(bundle check || bundle install)",
-        "rake run[#{params['recipe']}]"
+        "cd -P /var/chef/cookbooks && git fetch && git reset --hard HEAD && git clean -fd",
+        "git checkout -f #{params['branch'] || 'master'} && git pull -q",
+        "(bundle check || bundle install) && bundle exec rake run[#{params['recipe']}]"
       ] * ' && '
       node_run recipe_cmd
     end
   end
 
   def node_run(cmd)
-    puts "Running #{cmd}" if ENV['verbose']
-    system %[time ssh -o "StrictHostKeyChecking=no" -A root@#{@node.addresses[:public]} "#{cmd}"]
+    node_cmd = %[time ssh -o "StrictHostKeyChecking=no" -A root@#{@node.addresses[:public].first} "#{cmd}"]
+    puts "Running #{node_cmd}" if ENV['verbose']
+    system node_cmd
   end
 
   def prestrap_cmd
