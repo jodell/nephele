@@ -88,6 +88,7 @@ class Nephele::Runner < Optitron::CLI
 
   desc 'Delete an image'
   def delete(image)
+    puts "Deleting image #{image}"
     service.delete_image image
   end
 
