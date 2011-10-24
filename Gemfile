@@ -4,7 +4,7 @@ gem 'rake'
 gem 'cloudservers', '~>0.4'
 gem 'awesome_print'
 gem 'optitron'
-gem 'sexp_processor', '~>3.0.5'
+gem 'sexp_processor', '~>3.0.7'
 
 group :development do
   gem 'wirble'

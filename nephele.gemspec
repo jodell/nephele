@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeffrey O'Dell"]
-  s.date = %q{2011-10-19}
+  s.date = %q{2011-10-24}
   s.description = %q{Light administration utility for popular cloud services}
   s.email = %q{jeffrey.odell@gmail.com}
   s.executables = ["neph", "nephele"]
@@ -49,7 +49,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<cloudservers>, ["~> 0.4"])
       s.add_runtime_dependency(%q<awesome_print>, [">= 0"])
       s.add_runtime_dependency(%q<optitron>, [">= 0"])
-      s.add_runtime_dependency(%q<sexp_processor>, ["~> 3.0.5"])
+      s.add_runtime_dependency(%q<sexp_processor>, ["~> 3.0.7"])
       s.add_development_dependency(%q<wirble>, [">= 0"])
       s.add_development_dependency(%q<shoulda>, [">= 0"])
       s.add_development_dependency(%q<mocha>, [">= 0"])
@@ -63,7 +63,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<cloudservers>, ["~> 0.4"])
       s.add_dependency(%q<awesome_print>, [">= 0"])
       s.add_dependency(%q<optitron>, [">= 0"])
-      s.add_dependency(%q<sexp_processor>, ["~> 3.0.5"])
+      s.add_dependency(%q<sexp_processor>, ["~> 3.0.7"])
       s.add_dependency(%q<wirble>, [">= 0"])
       s.add_dependency(%q<shoulda>, [">= 0"])
       s.add_dependency(%q<mocha>, [">= 0"])
@@ -78,7 +78,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<cloudservers>, ["~> 0.4"])
     s.add_dependency(%q<awesome_print>, [">= 0"])
     s.add_dependency(%q<optitron>, [">= 0"])
-    s.add_dependency(%q<sexp_processor>, ["~> 3.0.5"])
+    s.add_dependency(%q<sexp_processor>, ["~> 3.0.7"])
     s.add_dependency(%q<wirble>, [">= 0"])
     s.add_dependency(%q<shoulda>, [">= 0"])
     s.add_dependency(%q<mocha>, [">= 0"])
